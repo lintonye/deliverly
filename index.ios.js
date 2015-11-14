@@ -6,6 +6,7 @@
 
 var React = require('react-native');
 var Mapbox = require('react-native-mapbox-gl');
+var Dimensions = require('Dimensions')
 var {
   AppRegistry,
   StyleSheet,
@@ -35,7 +36,15 @@ class DestinationsFilter extends View {
 // class BudgetFilter extends View {
 var BudgetFilter = React.createClass({
   onSliderChange(value) {
+    let step = 10
+    value = Math.floor(value / step) * step
     this.setState({ value })
+  },
+  onSlidingComplete() {
+    // alert(this.state.value)
+    if (this.props.onBudgetChanged) {
+      this.props.onBudgetChanged(this.state.value)
+    }
   },
   computeValueLabel(value) {
     return value == 0 ? 'Any budget' : `Above $${value}`
@@ -55,6 +64,7 @@ var BudgetFilter = React.createClass({
           value={0}
           maximumValue={100}
           step={10}
+          onSlidingComplete={this.onSlidingComplete}
           onValueChange={this.onSliderChange}
           />
       </View>
@@ -76,10 +86,14 @@ var FilterPopover = React.createClass({
     )
   },
   style() {
+    let popoverW = 400, popoverH = 500
+    let screenW = Dimensions.get('window').width
+    let screenH = Dimensions.get('window').height
     return {
+      opacity: this.props.isVisible ? 1 : 0,
       position: 'absolute',
-      top: 40,
-      left: 10,
+      top: (screenH - popoverH) / 2,
+      left: (screenW - popoverW) / 2,
     };
   }
 });
@@ -126,7 +140,7 @@ var deliverly = React.createClass({
               size={20}
               color='#333333'
               style={styles.toolbarButton}
-              />
+              >LocateMe</Text>
           </TouchableOpacity>
           <Text style={styles.toolbarTitle}>Deliverly</Text>
           <TouchableOpacity ref='btFilter' onPress={this.showFilterPopover}>
@@ -135,7 +149,7 @@ var deliverly = React.createClass({
               size={20}
               color='#333333'
               style={styles.toolbarButton}
-              />
+              >Filter</Text>
           </TouchableOpacity>
         </View>
         <Mapbox style={styles.map}
@@ -205,8 +219,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
   },
   toolbarButton: {
-    width: 40,
-    height: 30,
+    padding: 5,
   },
   map: {
     flex: 1,
