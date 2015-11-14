@@ -22,16 +22,21 @@ var {
 
 // TODO extract common code of filters?
 
-class DestinationsFilter extends View {
+var DestinationsFilter = React.createClass({
   render() {
     return (
       <View style={filterStyles.filterContainer}>
-        <Text style={filterStyles.filterTitle}>Destinations</Text>
+        <View style={filterStyles.header}>
+          <Text style={filterStyles.filterTitle}>Destinations</Text>
+          <TouchableOpacity>
+            <Text>^</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={filterStyles.filterValue} ref='valueLabel'>All</Text>
       </View>
     )
   }
-}
+})
 
 // class BudgetFilter extends View {
 var BudgetFilter = React.createClass({
@@ -57,7 +62,9 @@ var BudgetFilter = React.createClass({
   render() {
     return (
       <View style={filterStyles.filterContainer}>
-        <Text style={filterStyles.filterTitle}>Budget</Text>
+        <View style={filterStyles.header}>
+          <Text style={filterStyles.filterTitle}>Budget</Text>
+        </View>
         <Text style={filterStyles.filterValue} ref='valueLabel'>{this.computeValueLabel(this.state.value)}</Text>
         <SliderIOS
           style={filterStyles.slider}
@@ -86,7 +93,7 @@ var FilterPopover = React.createClass({
     )
   },
   style() {
-    let popoverW = 400, popoverH = 500
+    let popoverW = 300, popoverH = 500
     let screenW = Dimensions.get('window').width
     let screenH = Dimensions.get('window').height
     return {
@@ -94,21 +101,37 @@ var FilterPopover = React.createClass({
       position: 'absolute',
       top: (screenH - popoverH) / 2,
       left: (screenW - popoverW) / 2,
+      width: popoverW,
     };
   }
 });
 
+let commonPadding = {
+  margin: 5,
+  padding: 5,
+}
+
 var filterStyles = StyleSheet.create({
   filterContainer: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    backgroundColor: '#dddddd',
+    ...commonPadding,
   },
   filterTitle: {
-    fontSize: 15
+    flex: 1,
+    fontSize: 15,
   },
   filterValue: {
-    fontSize: 10
+    fontSize: 10,
+    ...commonPadding,
   },
   slider: {
-    width: 200,
+    width: 280,
+    marginLeft: 5,
+    ...commonPadding,
   },
 });
 
@@ -140,7 +163,7 @@ var deliverly = React.createClass({
               size={20}
               color='#333333'
               style={styles.toolbarButton}
-              >LocateMe</Text>
+              >Locate me</Text>
           </TouchableOpacity>
           <Text style={styles.toolbarTitle}>Deliverly</Text>
           <TouchableOpacity ref='btFilter' onPress={this.showFilterPopover}>
@@ -223,9 +246,6 @@ var styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-    width: 400,
-    borderWidth: 1,
-    borderColor: '#000000',
   },
 });
 
