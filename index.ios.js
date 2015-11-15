@@ -15,6 +15,7 @@ var {
   MapView,
   TouchableOpacity,
   SliderIOS,
+  Animated,
 } = React;
 
 // var { Icon, } = require('react-native-icons');
@@ -23,18 +24,47 @@ var {
 // TODO extract common code of filters?
 
 var DestinationsFilter = React.createClass({
+  toggleExpand() {
+    let state = this.state
+    Animated.timing(
+      this.state.expandButtonRotation,
+      {
+        toValue: state.expanded ? 0 : 180,
+        // friction: 1,
+        duration: 200,
+      }
+    ).start(() => {
+      state.expanded = !state.expanded
+      this.setState(state)
+      // alert(state.expandButtonRotation._value)
+    })
+  },
   render() {
     return (
       <View style={filterStyles.filterContainer}>
-        <View style={filterStyles.header}>
-          <Text style={filterStyles.filterTitle}>Destinations</Text>
-          <TouchableOpacity>
-            <Text>^</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={this.toggleExpand}>
+          <View style={filterStyles.header}>
+            <Text style={filterStyles.filterTitle}>Destinations</Text>
+            <Animated.Text
+              style={{
+                transform: [
+                  {rotate: this.state.expandButtonRotation.interpolate({
+                    inputRange: [0, 180],
+                    outputRange: ['0deg', '180deg'],
+                  }) },
+                ],
+              }}>▽</Animated.Text>
+          </View>
+        </TouchableOpacity>
         <Text style={filterStyles.filterValue} ref='valueLabel'>All</Text>
       </View>
     )
+  },
+  getInitialState() {
+    return {
+      expanded: false,
+      expandButtonRotation: new Animated.Value(0),
+    }
   }
 })
 
@@ -117,8 +147,11 @@ var filterStyles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    backgroundColor: '#dddddd',
+    // backgroundColor: '#dddddd',
     ...commonPadding,
+  },
+  expandButton: {
+    fontSize: 20,
   },
   filterTitle: {
     flex: 1,
