@@ -16,6 +16,7 @@ var {
   TouchableOpacity,
   SliderIOS,
   Animated,
+  LayoutAnimation,
   SwitchIOS,
 } = React;
 
@@ -36,6 +37,7 @@ var DestinationsFilter = React.createClass({
       }
     ).start(() => {
       state.expanded = !state.expanded
+      LayoutAnimation.spring()
       this.setState(state)
     })
   },
