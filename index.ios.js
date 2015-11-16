@@ -69,7 +69,7 @@ var DestinationsFilter = React.createClass({
           allOn = false
         }
       }
-      return (<Text style={filterStyles.filterValue}>{ allOn ? 'All' : dests }</Text>);
+      return <Text style={filterStyles.filterValue}>{ allOn ? 'All' : dests }</Text>;
     }
   },
   render() {
@@ -96,9 +96,10 @@ var DestinationsFilter = React.createClass({
   getInitialState() {
     let initialStatuses = this.props.destinations.reduce((o, dest) => {
       o[dest] = true; return o }, {})
+    let expanded = true
     return {
-      expanded: false,
-      expandButtonRotation: new Animated.Value(0),
+      expanded: expanded,
+      expandButtonRotation: new Animated.Value(expanded ? 180 : 0),
       destinationStatuses: initialStatuses,
     }
   }
@@ -196,7 +197,7 @@ var filterStyles = StyleSheet.create({
     fontSize: 15,
   },
   filterValue: {
-    fontSize: 10,
+    fontSize: 12,
     ...commonPadding,
   },
   slider: {
@@ -205,6 +206,89 @@ var filterStyles = StyleSheet.create({
     ...commonPadding,
   },
 });
+
+var orders = [
+  {
+    coordinates: [48.470720, -123.326226],
+    type: 'flower',
+    budget: 10,
+    destination: 'Victoria',
+  },
+  {
+    coordinates: [48.467590, -123.322750],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'Victoria',
+  },
+  {
+    coordinates: [48.466565, -123.323694],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'Victoria',
+  },
+  {
+    coordinates: [48.470634, -123.314596],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'Victoria',
+  },
+  {
+    coordinates: [48.467078, -123.316184],
+    type: 'flower',
+    budget: 10,
+    destination: 'View Royal',
+  },
+  {
+    coordinates: [48.468529, -123.313051],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'View Royal',
+  },
+  {
+    coordinates: [48.466935, -123.309274],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'View Royal',
+  },
+  {
+    coordinates: [48.464630, -123.318587],
+    type: 'furniture',
+    budget: 10,
+    destination: 'Saanich',
+  },
+  {
+    coordinates: [48.478202, -123.315111],
+    type: 'flower',
+    budget: 10,
+    destination: 'Saanich',
+  },
+  {
+    coordinates: [48.475585, -123.331075],
+    type: 'furniture',
+    budget: 10,
+    destination: 'Saanich',
+  },
+  {
+    coordinates: [48.475329, -123.337255],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'Landford',
+  },
+  {
+    coordinates: [48.467590, -123.328329],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'Landford',
+  },
+  {
+    coordinates: [48.471033, -123.298674],
+    type: 'restaurant',
+    budget: 10,
+    destination: 'Landford',
+  },
+]
+
+orders = orders.map((o, idx) => { o.id = idx; return o; })
 
 var deliverly = React.createClass({
   showFilterPopover() {
@@ -219,12 +303,21 @@ var deliverly = React.createClass({
   },
 
   closeFilterPopover() {
-    setState({
+    this.setState({
       filterPopover: { isVisible: false }
     })
   },
 
   render() {
+    let filterPopover
+    if (this.state.filterPopover.isVisible) {
+      filterPopover =
+        <FilterPopover
+          isVisible={this.state.filterPopover.isVisible}
+          fromRect={this.state.filterPopover.buttonRect}
+          onClose={this.closePopover}
+          />
+    }
     return (
       <View style={styles.container}>
         <View style={styles.toolbar}>
@@ -237,7 +330,9 @@ var deliverly = React.createClass({
               >Locate me</Text>
           </TouchableOpacity>
           <Text style={styles.toolbarTitle}>Deliverly</Text>
-          <TouchableOpacity ref='btFilter' onPress={this.showFilterPopover}>
+          <TouchableOpacity ref='btFilter' onPress={
+              this.state.filterPopover.isVisible ? this.closeFilterPopover :
+                this.showFilterPopover}>
             <Text
               name='fontawesome|filter'
               size={20}
@@ -255,11 +350,7 @@ var deliverly = React.createClass({
           zoomLevel={this.state.zoom}
           styleURL={'asset://styles/streets-v8.json'}
           />
-        <FilterPopover
-          isVisible={this.state.filterPopover.isVisible}
-          fromRect={this.state.filterPopover.buttonRect}
-          onClose={this.closePopover}
-          />
+        { filterPopover }
       </View>
     );
   },
@@ -275,11 +366,10 @@ var deliverly = React.createClass({
           type: 'point',
           title: 'Haha', subtitle: 'Superman2', hasLeftCallout: true, hasRightCallout: true}
       ],
-      center: { latitude: 37.33756603, longitude: -122.04120235 },
+      center: { latitude: 48.468635, longitude: -123.324363, },
       zoom: 13,
       filterPopover: {
         isVisible: true,
-        buttonRect: {x: 10, y: 80, width: 10, height: 10}
       }
     };
   },
