@@ -16,6 +16,7 @@ var {
   TouchableOpacity,
   SliderIOS,
   Animated,
+  SwitchIOS,
 } = React;
 
 // var { Icon, } = require('react-native-icons');
@@ -36,8 +37,38 @@ var DestinationsFilter = React.createClass({
     ).start(() => {
       state.expanded = !state.expanded
       this.setState(state)
-      // alert(state.expandButtonRotation._value)
     })
+  },
+  onSwitchValueChange(dest) {
+    return (v) => {
+      this.state.destinationStatuses[dest] = v
+      this.setState(this.state)
+    }
+  },
+  filterContent() {
+    if (this.state.expanded) {
+      let dests = this.props.destinations
+      return dests.map((dest) => {
+        let on = this.state.destinationStatuses[dest]
+        return (
+          <View style={{flexDirection: 'row', margin: 10}}>
+            <Text style={{flex: 1, fontSize: 12}}>{dest}</Text>
+            <SwitchIOS value={on} onValueChange={ this.onSwitchValueChange(dest) }/>
+          </View>
+        )
+      })
+    } else {
+      let allOn = true, dests = ''
+      for (let dest in this.state.destinationStatuses) {
+        if (this.state.destinationStatuses[dest]) {
+          if (dests.length > 0) dests += ', '
+          dests += dest
+        } else {
+          allOn = false
+        }
+      }
+      return (<Text style={filterStyles.filterValue}>{ allOn ? 'All' : dests }</Text>);
+    }
   },
   render() {
     return (
@@ -56,14 +87,17 @@ var DestinationsFilter = React.createClass({
               }}>▽</Animated.Text>
           </View>
         </TouchableOpacity>
-        <Text style={filterStyles.filterValue} ref='valueLabel'>All</Text>
+        { this.filterContent() }
       </View>
     )
   },
   getInitialState() {
+    let initialStatuses = this.props.destinations.reduce((o, dest) => {
+      o[dest] = true; return o }, {})
     return {
       expanded: false,
       expandButtonRotation: new Animated.Value(0),
+      destinationStatuses: initialStatuses,
     }
   }
 })
@@ -112,12 +146,14 @@ var BudgetFilter = React.createClass({
 
 var FilterPopover = React.createClass({
   render() {
+    let dests =
+      ['Victoria', 'Landford', 'View Royal', 'Saanich']
     return (
       <View
         style={this.style()}
         isVisible={this.props.isVisible}
         fromRect={this.props.fromRect}>
-        <DestinationsFilter />
+        <DestinationsFilter destinations={dests}/>
         <BudgetFilter />
       </View>
     )
