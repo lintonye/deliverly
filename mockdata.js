@@ -1,8 +1,8 @@
 'use strict';
 
 class Mockdata {
-  static orders() {
-    let orders = [
+  static deliveryRequests() {
+    let deliveryRequests = [
       {
         coordinates: [48.470720, -123.326226],
         type: 'flower',
@@ -82,7 +82,7 @@ class Mockdata {
         destination: 'Landford',
       },
     ]
-    return orders.map((o, idx) => { o.id = idx; return o; })
+    return deliveryRequests.map((o, idx) => { o.id = idx; return o; })
   }
 
   static destinations() {

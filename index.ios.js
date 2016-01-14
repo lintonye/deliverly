@@ -20,7 +20,9 @@ var {
   SwitchIOS,
 } = React;
 
-let Mockdata = require('./mockdata')
+let ServerApi = require('./serverApi')
+
+let Prefs = require('./prefs')
 
 // var { Icon, } = require('react-native-icons');
 // var Popover = require('react-native-popover');
@@ -45,36 +47,49 @@ var DestinationsFilter = React.createClass({
   },
   onSwitchValueChange(dest) {
     return (v) => {
-      this.state.destinationStatuses[dest] = v
-      this.setState(this.state)
+      let destinations = { ...this.state.filter.destinations }
+      destinations[dest] = v
+      let filter = { ...this.state.filter, destinations }
+      this.setState({...this.state, filter})
+      this.props.onFilterChange(filter)
     }
   },
   filterContent() {
     if (this.state.expanded) {
-      let dests = this.props.destinations
-      return dests.map((dest) => {
-        let on = this.state.destinationStatuses[dest]
-        return (
-          <View style={{flexDirection: 'row', margin: 10}}>
-            <Text style={{flex: 1, fontSize: 12}}>{dest}</Text>
-            <SwitchIOS value={on} onValueChange={ this.onSwitchValueChange(dest) }/>
-          </View>
-        )
-      })
+      let dests = this.state.filter.destinations
+      let tags = []
+      for (let dest in dests) {
+        if (dests.hasOwnProperty(dest)) {
+          let on = dests[dest]
+          tags.push(
+            <View style={{flexDirection: 'row', margin: 10}}>
+              <Text style={{flex: 1, fontSize: 12}}>{dest}</Text>
+              <SwitchIOS value={on} onValueChange={ this.onSwitchValueChange(dest) }/>
+            </View>
+          )
+        }
+      }
+      return tags
     } else {
       let allOn = true, dests = ''
-      for (let dest in this.state.destinationStatuses) {
-        if (this.state.destinationStatuses[dest]) {
-          if (dests.length > 0) dests += ', '
-          dests += dest
-        } else {
-          allOn = false
+      for (let dest in this.state.filter.destinations) {
+        if (this.state.filter.destinations.hasOwnProperty(dest)) {
+          if (this.state.filter.destinations[dest]) {
+            if (dests.length > 0) dests += ', '
+            dests += dest
+          } else {
+            allOn = false
+          }
         }
       }
       return <Text style={filterStyles.filterValue}>{ allOn ? 'All' : dests }</Text>;
     }
   },
   render() {
+    if (this.state.filter.destinations === undefined) {
+      this.state.filter = { ...this.props.initialFilter }
+    }
+
     return (
       <View style={filterStyles.filterContainer}>
         <TouchableOpacity onPress={this.toggleExpand}>
@@ -96,13 +111,11 @@ var DestinationsFilter = React.createClass({
     )
   },
   getInitialState() {
-    let initialStatuses = this.props.destinations.reduce((o, dest) => {
-      o[dest] = true; return o }, {})
     let expanded = true
     return {
       expanded: expanded,
       expandButtonRotation: new Animated.Value(expanded ? 180 : 0),
-      destinationStatuses: initialStatuses,
+      filter: {}
     }
   }
 })
@@ -111,8 +124,9 @@ var DestinationsFilter = React.createClass({
 var BudgetFilter = React.createClass({
   onSliderChange(value) {
     let step = 10
-    value = Math.floor(value / step) * step
-    this.setState({ value })
+    let budgetAbove = Math.floor(value / step) * step
+    let filter = { ...this.state.filter, budgetAbove }
+    this.setState({...this.state, filter})
   },
   onSlidingComplete() {
     // alert(this.state.value)
@@ -125,19 +139,26 @@ var BudgetFilter = React.createClass({
   },
   getInitialState() {
     return {
-      value: 0,
+      filter: {}
     }
   },
+  getBudgetAbove() {
+    return this.state.filter.budgetAbove
+  },
   render() {
+    if (this.state.filter.budgetAbove === undefined) {
+      this.state.filter = { ...this.props.initialFilter }
+    }
+
     return (
       <View style={filterStyles.filterContainer}>
         <View style={filterStyles.header}>
           <Text style={filterStyles.filterTitle}>Budget</Text>
         </View>
-        <Text style={filterStyles.filterValue} ref='valueLabel'>{this.computeValueLabel(this.state.value)}</Text>
+        <Text style={filterStyles.filterValue} ref='valueLabel'>{this.computeValueLabel(this.getBudgetAbove())}</Text>
         <SliderIOS
           style={filterStyles.slider}
-          value={0}
+          value={this.getBudgetAbove()}
           maximumValue={100}
           step={10}
           onSlidingComplete={this.onSlidingComplete}
@@ -150,15 +171,20 @@ var BudgetFilter = React.createClass({
 )
 
 var FilterPopover = React.createClass({
+  onFilterChange(filter) {
+      this.props.onFilterChange(filter)
+  },
+
   render() {
-    let dests = Mockdata.destinations()
     return (
       <View
         style={this.style()}
         isVisible={this.props.isVisible}
         fromRect={this.props.fromRect}>
-        <DestinationsFilter destinations={dests}/>
-        <BudgetFilter />
+        <DestinationsFilter initialFilter={this.props.initialFilter}
+          onFilterChange={this.onFilterChange} />
+        <BudgetFilter initialFilter={this.props.initialFilter}
+          onBudgetChanged={this.onFilterChange} />
       </View>
     )
   },
@@ -236,6 +262,8 @@ var deliverly = React.createClass({
           isVisible={this.state.filterPopover.isVisible}
           fromRect={this.state.filterPopover.buttonRect}
           onClose={this.closePopover}
+          initialFilter={this.state.filter}
+          onFilterChange={this.onFilterChange}
           />
     }
     return (
@@ -263,11 +291,11 @@ var deliverly = React.createClass({
         </View>
         <Mapbox style={styles.map}
           zoomEnabled={true}
-          annotations={this.state.annotations}
+          annotations={this.state.map.annotations}
           direction={0}
           accessToken="sk.eyJ1IjoiamltdWxhYnMiLCJhIjoiY2lnd2w1Y2F3MHQ0cnd5bTBtYm1mNzFlbSJ9.hJTKysrSX6M55PD_W-vs-w"
-          centerCoordinate={this.state.center}
-          zoomLevel={this.state.zoom}
+          centerCoordinate={this.state.map.center}
+          zoomLevel={this.state.map.zoom}
           styleURL={'asset://styles/streets-v8.json'}
           />
         { filterPopover }
@@ -278,28 +306,65 @@ var deliverly = React.createClass({
   getInitialState() {
     return {
       position: 'Unknown',
-      annotations: [
-        {coordinates: [37.33756603, -122.04120235],
-          type: 'point',
-          title: 'Haha', subtitle: 'Superman1', hasLeftCallout: false, hasRightCallout: true},
-        {coordinates: [37.32756608, -122.04120245],
-          type: 'point',
-          title: 'Haha', subtitle: 'Superman2', hasLeftCallout: true, hasRightCallout: true}
-      ],
-      center: { latitude: 48.468635, longitude: -123.324363, },
-      zoom: 13,
+      map: {
+        // annotations: [
+        //   {coordinates: [37.33756603, -122.04120235],
+        //     type: 'point',
+        //     title: 'Haha', subtitle: 'Superman1', hasLeftCallout: false, hasRightCallout: true},
+        //     {coordinates: [37.32756608, -122.04120245],
+        //       type: 'point',
+        //       title: 'Haha', subtitle: 'Superman2', hasLeftCallout: true, hasRightCallout: true}
+        //     ],
+        center: { latitude: 48.468635, longitude: -123.324363, },
+        zoom: 13,
+      },
+
       filterPopover: {
-        isVisible: true,
-      }
+        isVisible: false,
+      },
+
+      deliveryRequests: [],
+      filter: {}
     };
   },
 
-  componentDidMount() {
+  locateMe() {
     navigator.geolocation.getCurrentPosition(
       (position) => this.setState({position}),
       (error) => console.log(error.message),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );
+  },
+
+  onFilterChange(filter) {
+    this.state.filter = filter
+    this.setState(this.state)
+    console.log('will fetch new delivery requests')
+    console.log(this.state)
+
+    let request2marker = (request) => {
+      return {
+        coordinates: request.coordinates,
+        type: 'point',
+        title: `${request.type} Budget:$${request.budget}`,
+        subtitle: `Destination: ${request.destination}`,
+      }
+    }
+
+    ServerApi.getDeliveryRequests(this.state.filter, (requests) => {
+      this.state.deliveryRequests = requests
+      this.state.map.annotations = requests.map(request2marker)
+      this.setState(this.state)
+    })
+  },
+
+  componentDidMount() {
+    ServerApi.getDestinations((dests) => {
+      let prefFilter = Prefs.getFilter()
+      let destFilter = dests.reduce((o, dest) => {
+        o[dest] = prefFilter.destinations[dest] || true ; return o }, {})
+      this.onFilterChange({ ...prefFilter, destinations: destFilter })
+    });
   },
 
   componentWillUnmount() {
