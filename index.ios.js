@@ -201,6 +201,7 @@ var FilterPopover = React.createClass({
     return {
       window: {
         opacity: this.props.isVisible ? 1 : 0,
+        backgroundColor: 'rgba(255,255,255,0.85)',
         position: 'absolute',
         top: (screenH - popoverH) / 2,
         left: (screenW - popoverW) / 2,
@@ -323,7 +324,7 @@ var deliverly = React.createClass({
       },
 
       filterPopover: {
-        isVisible: true,
+        isVisible: false,
       },
 
       deliveryRequests: [],
