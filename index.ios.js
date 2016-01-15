@@ -174,12 +174,19 @@ var FilterPopover = React.createClass({
       this.props.onFilterChange(filter)
   },
 
+  closePopover() {
+    this.props.onClose();
+  },
+
   render() {
     return (
       <View
-        style={this.style()}
+        style={this.style().window}
         isVisible={this.props.isVisible}
         fromRect={this.props.fromRect}>
+        <TouchableOpacity onPress={this.closePopover}>
+          <Text style={this.style().x}>x</Text>
+        </TouchableOpacity>
         <DestinationsFilter initialFilter={this.props.initialFilter}
           onFilterChange={this.onFilterChange} />
         <BudgetFilter initialFilter={this.props.initialFilter}
@@ -192,11 +199,18 @@ var FilterPopover = React.createClass({
     let screenW = Dimensions.get('window').width
     let screenH = Dimensions.get('window').height
     return {
-      opacity: this.props.isVisible ? 1 : 0,
-      position: 'absolute',
-      top: (screenH - popoverH) / 2,
-      left: (screenW - popoverW) / 2,
-      width: popoverW,
+      window: {
+        opacity: this.props.isVisible ? 1 : 0,
+        position: 'absolute',
+        top: (screenH - popoverH) / 2,
+        left: (screenW - popoverW) / 2,
+        width: popoverW,
+      },
+      x: {
+        textAlign: 'right',
+        marginTop: 5,
+        marginRight: 10,
+      }
     };
   }
 });
@@ -233,8 +247,6 @@ var filterStyles = StyleSheet.create({
   },
 });
 
-
-
 var deliverly = React.createClass({
   showFilterPopover() {
     this.refs.btFilter.measure((ox, oy, width, height, px, py) => {
@@ -260,7 +272,7 @@ var deliverly = React.createClass({
         <FilterPopover
           isVisible={this.state.filterPopover.isVisible}
           fromRect={this.state.filterPopover.buttonRect}
-          onClose={this.closePopover}
+          onClose={this.closeFilterPopover}
           initialFilter={this.state.filter}
           onFilterChange={this.onFilterChange}
           />
@@ -311,7 +323,7 @@ var deliverly = React.createClass({
       },
 
       filterPopover: {
-        isVisible: false,
+        isVisible: true,
       },
 
       deliveryRequests: [],

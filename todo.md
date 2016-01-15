@@ -1,5 +1,4 @@
 - model states of deliverly
 - possible to access the state of a child?
-- implement filters
 - save filter data as prefs
 - different map marker images
