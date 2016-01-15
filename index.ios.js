@@ -49,7 +49,7 @@ var DestinationsFilter = React.createClass({
     return (v) => {
       let destinations = { ...this.state.filter.destinations }
       destinations[dest] = v
-      let filter = { ...this.state.filter, destinations }
+      let filter = { destinations }
       this.setState({...this.state, filter})
       this.props.onFilterChange(filter)
     }
@@ -82,7 +82,7 @@ var DestinationsFilter = React.createClass({
           }
         }
       }
-      return <Text style={filterStyles.filterValue}>{ allOn ? 'All' : dests }</Text>;
+      return <Text style={filterStyles.filterValue} onPress={this.toggleExpand}>{ allOn ? 'All' : dests }</Text>;
     }
   },
   render() {
@@ -125,13 +125,12 @@ var BudgetFilter = React.createClass({
   onSliderChange(value) {
     let step = 10
     let budgetAbove = Math.floor(value / step) * step
-    let filter = { ...this.state.filter, budgetAbove }
+    let filter = { budgetAbove }
     this.setState({...this.state, filter})
   },
   onSlidingComplete() {
-    // alert(this.state.value)
     if (this.props.onBudgetChanged) {
-      this.props.onBudgetChanged(this.state.value)
+      this.props.onBudgetChanged(this.state.filter)
     }
   },
   computeValueLabel(value) {
@@ -307,14 +306,6 @@ var deliverly = React.createClass({
     return {
       position: 'Unknown',
       map: {
-        // annotations: [
-        //   {coordinates: [37.33756603, -122.04120235],
-        //     type: 'point',
-        //     title: 'Haha', subtitle: 'Superman1', hasLeftCallout: false, hasRightCallout: true},
-        //     {coordinates: [37.32756608, -122.04120245],
-        //       type: 'point',
-        //       title: 'Haha', subtitle: 'Superman2', hasLeftCallout: true, hasRightCallout: true}
-        //     ],
         center: { latitude: 48.468635, longitude: -123.324363, },
         zoom: 13,
       },
@@ -337,7 +328,7 @@ var deliverly = React.createClass({
   },
 
   onFilterChange(filter) {
-    this.state.filter = filter
+    this.state.filter = { ...this.state.filter, ...filter }
     this.setState(this.state)
     console.log('will fetch new delivery requests')
     console.log(this.state)

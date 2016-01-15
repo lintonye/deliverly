@@ -13,8 +13,22 @@ class ServerApi {
   }
 
   static applyFilter(filter, deliveryRequests) {
-    //TODO implement filter
-    return deliveryRequests
+    return deliveryRequests.filter((dr) => {
+      let result = true;
+      if (filter && filter.destinations) {
+        let ds = []
+        for (let d in filter.destinations) {
+          if (filter.destinations[d]) {
+            ds.push(d);
+          }
+        }
+        result = result && ds.includes(dr.destination);
+      }
+      if (filter && filter.budgetAbove) {
+        result = result && (filter.budgetAbove === 0 || dr.budget >= filter.budgetAbove)
+      }
+      return result;
+    })
   }
 }
 

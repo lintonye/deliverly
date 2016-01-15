@@ -1,8 +1,5 @@
 - model states of deliverly
 - possible to access the state of a child?
-- feed deliverly mockdata.orders
-- create map annotations from mockdata
 - implement filters
 - save filter data as prefs
-- load mockdata from async: simulate http requests
 - different map marker images

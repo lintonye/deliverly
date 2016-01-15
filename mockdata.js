@@ -6,13 +6,13 @@ class Mockdata {
       {
         coordinates: [48.470720, -123.326226],
         type: 'flower',
-        budget: 10,
+        budget: 100,
         destination: 'Victoria',
       },
       {
         coordinates: [48.467590, -123.322750],
         type: 'restaurant',
-        budget: 10,
+        budget: 40,
         destination: 'Victoria',
       },
       {
@@ -24,13 +24,13 @@ class Mockdata {
       {
         coordinates: [48.470634, -123.314596],
         type: 'restaurant',
-        budget: 10,
+        budget: 20,
         destination: 'Victoria',
       },
       {
         coordinates: [48.467078, -123.316184],
         type: 'flower',
-        budget: 10,
+        budget: 60,
         destination: 'View Royal',
       },
       {
